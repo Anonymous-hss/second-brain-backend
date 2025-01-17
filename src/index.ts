@@ -29,3 +29,7 @@ app.post("/api/v1/brain/share", (req, res) => {});
 
 app.get("/api/v1/brain/:shareLink", (req, res) => {});
 app.get;
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
