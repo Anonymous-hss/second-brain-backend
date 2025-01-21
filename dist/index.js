@@ -36,7 +36,7 @@ app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
         return;
     }
 }));
-app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const username = req.body.username;
     const password = req.body.password;
     const existingUser = yield db_1.UserModel.findOne({
@@ -71,7 +71,16 @@ app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter
         message: "Content Added",
     });
 }));
-app.post("/api/v1/content", (req, res) => { });
+app.get("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //@ts-ignore
+    const userId = req.userId;
+    const content = yield db_1.ContentModel.find({
+        userId: userId,
+    }).populate("userId", "username");
+    res.json({
+        content,
+    });
+}));
 app.post("/api/v1/content", (req, res) => { });
 app.post("/api/v1/brain/share", (req, res) => { });
 app.get("/api/v1/brain/:shareLink", (req, res) => { });
