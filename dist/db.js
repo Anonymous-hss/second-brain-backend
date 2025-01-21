@@ -23,11 +23,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserModel = void 0;
+exports.ContentModel = exports.UserModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 mongoose_1.default.connect("mongodb+srv://h2424:h2424@cluster0.c2mlnwt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 const UserSchema = new mongoose_1.Schema({
     username: { type: String, unique: true },
     password: String,
 });
+const contentSchema = new mongoose_1.Schema({
+    title: String,
+    link: String,
+    tags: [{ type: mongoose_1.default.Types.ObjectId, ref: "Tag" }],
+    userId: { type: mongoose_1.default.Types.ObjectId, ref: "User" },
+});
 exports.UserModel = (0, mongoose_1.model)("User", UserSchema);
+exports.ContentModel = (0, mongoose_1.model)("Content", contentSchema);

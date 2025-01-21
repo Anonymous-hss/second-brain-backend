@@ -63,7 +63,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     tags: [],
   });
 
-  return res.json({
+  res.json({
     message: "Content Added",
   });
 });
