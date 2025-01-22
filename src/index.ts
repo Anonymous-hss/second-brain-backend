@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { ContentModel, UserModel } from "./db";
 import { JWT_PASSWORD } from "./config";
 import { userMiddleware } from "./middleware";
+import { Request, Response } from "express";
 
 const app = express();
 app.use(express.json());
@@ -94,10 +95,50 @@ app.delete("/api/v1/content", async (req, res) => {
   });
 });
 
-app.post("/api/v1/brain/share", (req, res) => {});
+app.post("/api/v1/brain/share", async (req, res) => {
+  const contentId = req.body;
 
-app.get("/api/v1/brain/:shareLink", (req, res) => {});
-app.get;
+  try {
+    //@ts-ignore
+    const userId = req.userId;
+    const content = await ContentModel.findOne({ _id: contentId, userId });
+
+    if (!content) {
+      res.status(404).json({ message: "Content not found" });
+    }
+
+    const shareLink = contentId._id;
+
+    res.json({
+      message: "Content Shared Successfully",
+      shareLink: `/api/vi/brain/${shareLink}`,
+    });
+  } catch (err) {
+    res.json({
+      message: err + "Cannot Share the content",
+    });
+  }
+});
+
+// app.get(
+//   "/api/v1/brain/:shareLink",
+//   async (req: Request<{ shareLink: string }>, res: Response) => {
+//     const { shareLink } = req.params;
+
+//     try {
+//       const content = await ContentModel.findOne({ _id: shareLink });
+//       if (!content) {
+//         return res.status(404).json({ message: "content not found" });
+//       }
+
+//       res.json({
+//         content,
+//       });
+//     } catch (err) {
+//       res.status(500).json({ message: "Error retriving content" + err });
+//     }
+//   }
+// );
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
