@@ -97,17 +97,33 @@ app.delete("/api/v1/content", async (req, res) => {
 });
 
 app.post("/api/v1/brain/share", async (req, res) => {
+  const hash = random(10);
   const share = req.body.share;
   if (share) {
+    const existingLink = await LinkModel.findOne({
+      //@ts-ignore
+      userId: req.userId,
+    });
+
+    if (existingLink) {
+      res.json({
+        hash: existingLink.hash,
+      });
+    }
+
     await LinkModel.create({
       //@ts-ignore
       userId: req.userId,
-      hash: random(10),
+      hash: hash,
     });
   } else {
     await LinkModel.deleteOne({
       //@ts-ignore
-      userId: req.userId,
+      _id: req.userId,
+    });
+
+    res.json({
+      message: "Removed Link",
     });
   }
 });
@@ -131,7 +147,7 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
   });
 
   const user = await UserModel.findOne({
-    userId: link.userId,
+    _id: link.userId,
   });
 
   res.json({
