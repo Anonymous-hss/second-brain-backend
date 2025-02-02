@@ -1,10 +1,11 @@
 import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import { ContentModel, UserModel } from "./db";
+import { ContentModel, LinkModel, UserModel } from "./db";
 import { JWT_PASSWORD } from "./config";
 import { userMiddleware } from "./middleware";
 import { Request, Response } from "express";
+import { random } from "./utils";
 
 const app = express();
 app.use(express.json());
@@ -96,49 +97,48 @@ app.delete("/api/v1/content", async (req, res) => {
 });
 
 app.post("/api/v1/brain/share", async (req, res) => {
-  const contentId = req.body;
-
-  try {
-    //@ts-ignore
-    const userId = req.userId;
-    const content = await ContentModel.findOne({ _id: contentId, userId });
-
-    if (!content) {
-      res.status(404).json({ message: "Content not found" });
-    }
-
-    const shareLink = contentId._id;
-
-    res.json({
-      message: "Content Shared Successfully",
-      shareLink: `/api/vi/brain/${shareLink}`,
+  const share = req.body.share;
+  if (share) {
+    await LinkModel.create({
+      //@ts-ignore
+      userId: req.userId,
+      hash: random(10),
     });
-  } catch (err) {
-    res.json({
-      message: err + "Cannot Share the content",
+  } else {
+    await LinkModel.deleteOne({
+      //@ts-ignore
+      userId: req.userId,
     });
   }
 });
 
-// app.get(
-//   "/api/v1/brain/:shareLink",
-//   async (req: Request<{ shareLink: string }>, res: Response) => {
-//     const { shareLink } = req.params;
+app.get("/api/v1/brain/:shareLink", async (req, res) => {
+  const hash = req.params.shareLink;
 
-//     try {
-//       const content = await ContentModel.findOne({ _id: shareLink });
-//       if (!content) {
-//         return res.status(404).json({ message: "content not found" });
-//       }
+  const link = await LinkModel.findOne({
+    hash,
+  });
 
-//       res.json({
-//         content,
-//       });
-//     } catch (err) {
-//       res.status(500).json({ message: "Error retriving content" + err });
-//     }
-//   }
-// );
+  if (!link) {
+    res.status(411).json({
+      message: "Sorry incorrect imput",
+    });
+    return;
+  }
+
+  const content = await ContentModel.find({
+    userId: link.userId,
+  });
+
+  const user = await UserModel.findOne({
+    userId: link.userId,
+  });
+
+  res.json({
+    username: user?.username,
+    content: content,
+  });
+});
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

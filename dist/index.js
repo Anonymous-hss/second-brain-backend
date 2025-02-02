@@ -81,10 +81,55 @@ app.get("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(
         content,
     });
 }));
-app.post("/api/v1/content", (req, res) => { });
-app.post("/api/v1/brain/share", (req, res) => { });
-app.get("/api/v1/brain/:shareLink", (req, res) => { });
-app.get;
+app.delete("/api/v1/content", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const contentId = req.body.contentId;
+    yield db_1.ContentModel.deleteMany({
+        contentId: contentId,
+        //@ts-ignore
+        userId: userId,
+    });
+    res.json({
+        message: "Deleted",
+    });
+}));
+app.post("/api/v1/brain/share", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const contentId = req.body;
+    try {
+        //@ts-ignore
+        const userId = req.userId;
+        const content = yield db_1.ContentModel.findOne({ _id: contentId, userId });
+        if (!content) {
+            res.status(404).json({ message: "Content not found" });
+        }
+        const shareLink = contentId._id;
+        res.json({
+            message: "Content Shared Successfully",
+            shareLink: `/api/vi/brain/${shareLink}`,
+        });
+    }
+    catch (err) {
+        res.json({
+            message: err + "Cannot Share the content",
+        });
+    }
+}));
+// app.get(
+//   "/api/v1/brain/:shareLink",
+//   async (req: Request<{ shareLink: string }>, res: Response) => {
+//     const { shareLink } = req.params;
+//     try {
+//       const content = await ContentModel.findOne({ _id: shareLink });
+//       if (!content) {
+//         return res.status(404).json({ message: "content not found" });
+//       }
+//       res.json({
+//         content,
+//       });
+//     } catch (err) {
+//       res.status(500).json({ message: "Error retriving content" + err });
+//     }
+//   }
+// );
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });
